@@ -89,7 +89,7 @@ if run and reference_embedding is not None:
         if not ret:
             st.error("Failed to capture video", icon="🚨")
             break
-
+while (camera.IsOpened()):   
         # Resize frame for face detection
         h, w = frame.shape[:2]
         face_input = cv2.resize(frame, (672, 384))
