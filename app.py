@@ -3,7 +3,6 @@ import cv2
 import numpy as np
 from openvino.runtime import Core
 from scipy.spatial.distance import cosine
-from camera_input_live import camera_input_live
 
 # Initialize OpenVINO's Inference Engine
 ie = Core()
@@ -47,6 +46,8 @@ st.text("Using OpenVINO and Streamlit")
 
 # Upload the reference image
 uploaded_file = st.file_uploader("Upload a picture of the person to compare", type=["jpg", "jpeg", "png"])
+reference_embedding = None  # Initialize reference_embedding
+
 if uploaded_file is not None:
     # Load the reference image
     reference_image = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
@@ -54,7 +55,6 @@ if uploaded_file is not None:
     st.image(reference_image, caption="Uploaded Reference Image", use_column_width=True)
 
     # Perform face detection and embedding extraction on the reference image
-    reference_embedding = None
     h, w = reference_image.shape[:2]
     face_input = cv2.resize(reference_image, (672, 384))  # Resize to model input size
     face_input = face_input.transpose((2, 0, 1))  # Convert HWC to CHW
@@ -78,18 +78,21 @@ if uploaded_file is not None:
 
 # Start Webcam Stream
 run = st.checkbox('Run Webcam and Compare')
-FRAME_WINDOW = camera_input_live()
+FRAME_WINDOW = st.image([])
 
+if run:
+    cap = cv2.VideoCapture(0)
 
-reference_embedding = None
-if run and reference_embedding is not None:
-    cap = camera.VideoCapture(0)
+    if not cap.isOpened():
+        st.error("Cannot open webcam", icon="🚨")
+        st.stop()
+
     while run:
-        ret, frame = camera.read()
+        ret, frame = cap.read()
         if not ret:
             st.error("Failed to capture video", icon="🚨")
             break
-while (camera.IsOpened()):   
+
         # Resize frame for face detection
         h, w = frame.shape[:2]
         face_input = cv2.resize(frame, (672, 384))
@@ -116,9 +119,10 @@ while (camera.IsOpened()):
                 current_embedding = get_face_embedding(face_crop, embedding_exec_net, embedding_input_layer_name)
 
                 # Compare the embeddings
-                similarity = cosine_similarity(reference_embedding, current_embedding)
-                if similarity > 0.5:  # Adjust threshold as needed
-                    cv2.putText(frame, "Criminal Identified!", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+                if reference_embedding is not None:
+                    similarity = cosine_similarity(reference_embedding, current_embedding)
+                    if similarity > 0.5:  # Adjust threshold as needed
+                        cv2.putText(frame, "Criminal Identified!", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
 
         # Display the frame in Streamlit
         FRAME_WINDOW.image(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
@@ -126,5 +130,7 @@ while (camera.IsOpened()):
     cap.release()
     cv2.destroyAllWindows()
 else:
+    st.warning("Please upload a reference image to start comparison.")
+
     st.warning("Please upload a reference image to start comparison.")
 
