@@ -79,6 +79,8 @@ if uploaded_file is not None:
 run = st.checkbox('Run Webcam and Compare')
 FRAME_WINDOW = st.image([])
 
+
+reference_embedding = None
 if run and reference_embedding is not None:
     cap = cv2.VideoCapture(0)
 
