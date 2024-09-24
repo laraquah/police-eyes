@@ -44,10 +44,11 @@ def get_face_embedding(image, exec_net, input_layer_name):
 st.title("Police Eyes :cop:")
 st.text("Using OpenVINO and Streamlit")
 
+# Initialize reference_embedding outside the uploader to avoid NameError
+reference_embedding = None
+
 # Upload the reference image
 uploaded_file = st.file_uploader("Upload a picture of the person to compare", type=["jpg", "jpeg", "png"])
-reference_embedding = None  # Initialize reference_embedding
-
 if uploaded_file is not None:
     # Load the reference image
     reference_image = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
@@ -100,6 +101,7 @@ if run:
         face_input = np.expand_dims(face_input, axis=0)
 
         # Perform face detection
+        face_infer_request = face_exec_net.create_infer_request()
         face_infer_request.infer(inputs={face_input_layer_name: face_input})
         detections = face_infer_request.get_output_tensor().data
 
@@ -128,9 +130,5 @@ if run:
         FRAME_WINDOW.image(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
 
     cap.release()
-    cv2.destroyAllWindows()
 else:
     st.warning("Please upload a reference image to start comparison.")
-
-    st.warning("Please upload a reference image to start comparison.")
-
