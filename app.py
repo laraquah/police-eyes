@@ -124,7 +124,6 @@ if run and reference_embedding is not None:
         FRAME_WINDOW.image(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
 
     cap.release()
-    cv2.destroyAllWindows()
 else:
     st.warning("Please upload a reference image to start comparison.")
 
