@@ -80,7 +80,7 @@ run = st.checkbox('Run Webcam and Compare')
 FRAME_WINDOW = st.image([])
 
 
-reference_embedding = 0
+reference_embedding = None
 if run and reference_embedding is not None:
     cap = cv2.VideoCapture(0)
 
@@ -124,6 +124,7 @@ if run and reference_embedding is not None:
         FRAME_WINDOW.image(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
 
     cap.release()
+    cv2.destroyAllWindows()
 else:
     st.warning("Please upload a reference image to start comparison.")
 
