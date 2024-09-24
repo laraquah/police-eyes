@@ -83,9 +83,9 @@ FRAME_WINDOW = camera_input_live()
 
 reference_embedding = None
 if run and reference_embedding is not None:
-    cap = cv2.VideoCapture(0)
+    cap = camera.VideoCapture(0)
     while run:
-        ret, frame = cap.read()
+        ret, frame = camera.read()
         if not ret:
             st.error("Failed to capture video", icon="🚨")
             break
