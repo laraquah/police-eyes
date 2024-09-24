@@ -82,7 +82,7 @@ FRAME_WINDOW = st.image([])
 
 reference_embedding = None
 if run and reference_embedding is not None:
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(1)
 
     while run:
         ret, frame = cap.read()
