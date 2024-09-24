@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 from openvino.runtime import Core
 from scipy.spatial.distance import cosine
+from camera_input_live import camera_input_live
 
 # Initialize OpenVINO's Inference Engine
 ie = Core()
@@ -77,6 +78,7 @@ if uploaded_file is not None:
 
 # Start Webcam Stream
 run = st.checkbox('Run Webcam and Compare')
+camera_input_live()
 FRAME_WINDOW = st.image([])
 
 
