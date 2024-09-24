@@ -1,8 +1,8 @@
 import streamlit as st
-import cv2
 import numpy as np
 from openvino.runtime import Core
 from scipy.spatial.distance import cosine
+from streamlit_camera_input import CameraInput
 
 # Initialize OpenVINO's Inference Engine
 ie = Core()
@@ -77,23 +77,14 @@ if uploaded_file is not None:
             face_crop = reference_image[ymin:ymax, xmin:xmax]
             reference_embedding = get_face_embedding(face_crop, embedding_exec_net, embedding_input_layer_name)
 
-# Start Webcam Stream
-run = st.checkbox('Run Webcam and Compare')
-FRAME_WINDOW = st.image([])
+# Start Webcam Stream with CameraInput
+st.write("**Webcam Stream**")
+camera_input = CameraInput("camera")
 
-if run:
-    cap = cv2.VideoCapture(0)
+if camera_input.is_recording():
+    frame = camera_input.get_image()
 
-    if not cap.isOpened():
-        st.error("Cannot open webcam", icon="🚨")
-        st.stop()
-
-    while run:
-        ret, frame = cap.read()
-        if not ret:
-            st.error("Failed to capture video", icon="🚨")
-            break
-
+    if frame is not None and reference_embedding is not None:
         # Resize frame for face detection
         h, w = frame.shape[:2]
         face_input = cv2.resize(frame, (672, 384))
@@ -121,14 +112,12 @@ if run:
                 current_embedding = get_face_embedding(face_crop, embedding_exec_net, embedding_input_layer_name)
 
                 # Compare the embeddings
-                if reference_embedding is not None:
-                    similarity = cosine_similarity(reference_embedding, current_embedding)
-                    if similarity > 0.5:  # Adjust threshold as needed
-                        cv2.putText(frame, "Criminal Identified!", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+                similarity = cosine_similarity(reference_embedding, current_embedding)
+                if similarity > 0.5:  # Adjust threshold as needed
+                    cv2.putText(frame, "Criminal Identified!", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
 
         # Display the frame in Streamlit
-        FRAME_WINDOW.image(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+        st.image(frame, caption="Webcam Feed", channels="BGR")
 
-    cap.release()
 else:
     st.warning("Please upload a reference image to start comparison.")
