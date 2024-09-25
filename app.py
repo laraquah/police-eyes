@@ -1,8 +1,9 @@
 import streamlit as st
+import cv2
 import numpy as np
 from openvino.runtime import Core
 from scipy.spatial.distance import cosine
-from streamlit_camera_input import CameraInput
+from streamlit_webrtc import VideoTransformerBase, webrtc_streamer
 
 # Initialize OpenVINO's Inference Engine
 ie = Core()
@@ -44,9 +45,6 @@ def get_face_embedding(image, exec_net, input_layer_name):
 st.title("Police Eyes :cop:")
 st.text("Using OpenVINO and Streamlit")
 
-# Initialize reference_embedding outside the uploader to avoid NameError
-reference_embedding = None
-
 # Upload the reference image
 uploaded_file = st.file_uploader("Upload a picture of the person to compare", type=["jpg", "jpeg", "png"])
 if uploaded_file is not None:
@@ -56,6 +54,7 @@ if uploaded_file is not None:
     st.image(reference_image, caption="Uploaded Reference Image", use_column_width=True)
 
     # Perform face detection and embedding extraction on the reference image
+    reference_embedding = None
     h, w = reference_image.shape[:2]
     face_input = cv2.resize(reference_image, (672, 384))  # Resize to model input size
     face_input = face_input.transpose((2, 0, 1))  # Convert HWC to CHW
@@ -77,47 +76,49 @@ if uploaded_file is not None:
             face_crop = reference_image[ymin:ymax, xmin:xmax]
             reference_embedding = get_face_embedding(face_crop, embedding_exec_net, embedding_input_layer_name)
 
-# Start Webcam Stream with CameraInput
-st.write("**Webcam Stream**")
-camera_input = CameraInput("camera")
+# Define a custom transformer class to process the video stream
+class FaceComparison(VideoTransformerBase):
+    def __init__(self):
+        self.reference_embedding = reference_embedding  # Embedding from uploaded image
 
-if camera_input.is_recording():
-    frame = camera_input.get_image()
+    def transform(self, frame):
+        frame = frame.to_ndarray(format="bgr24")
 
-    if frame is not None and reference_embedding is not None:
-        # Resize frame for face detection
-        h, w = frame.shape[:2]
-        face_input = cv2.resize(frame, (672, 384))
-        face_input = face_input.transpose((2, 0, 1))
-        face_input = np.expand_dims(face_input, axis=0)
+        if self.reference_embedding is not None:
+            h, w = frame.shape[:2]
+            face_input = cv2.resize(frame, (672, 384))
+            face_input = face_input.transpose((2, 0, 1))
+            face_input = np.expand_dims(face_input, axis=0)
 
-        # Perform face detection
-        face_infer_request = face_exec_net.create_infer_request()
-        face_infer_request.infer(inputs={face_input_layer_name: face_input})
-        detections = face_infer_request.get_output_tensor().data
+            # Perform face detection
+            face_infer_request.infer(inputs={face_input_layer_name: face_input})
+            detections = face_infer_request.get_output_tensor().data
 
-        for detection in detections[0][0]:
-            confidence = detection[2]
-            if confidence > 0.5:
-                xmin = int(detection[3] * w)
-                ymin = int(detection[4] * h)
-                xmax = int(detection[5] * w)
-                ymax = int(detection[6] * h)
+            for detection in detections[0][0]:
+                confidence = detection[2]
+                if confidence > 0.5:
+                    xmin = int(detection[3] * w)
+                    ymin = int(detection[4] * h)
+                    xmax = int(detection[5] * w)
+                    ymax = int(detection[6] * h)
 
-                # Draw rectangle around face
-                cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (0, 255, 0), 2)
+                    # Draw rectangle around face
+                    cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (0, 255, 0), 2)
 
-                # Extract face for embedding generation
-                face_crop = frame[ymin:ymax, xmin:xmax]
-                current_embedding = get_face_embedding(face_crop, embedding_exec_net, embedding_input_layer_name)
+                    # Extract face for embedding generation
+                    face_crop = frame[ymin:ymax, xmin:xmax]
+                    current_embedding = get_face_embedding(face_crop, embedding_exec_net, embedding_input_layer_name)
 
-                # Compare the embeddings
-                similarity = cosine_similarity(reference_embedding, current_embedding)
-                if similarity > 0.5:  # Adjust threshold as needed
-                    cv2.putText(frame, "Criminal Identified!", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+                    # Compare the embeddings
+                    similarity = cosine_similarity(self.reference_embedding, current_embedding)
+                    if similarity > 0.5:  # Adjust threshold as needed
+                        cv2.putText(frame, "Criminal Identified!", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
 
-        # Display the frame in Streamlit
-        st.image(frame, caption="Webcam Feed", channels="BGR")
+        return frame
+
+# Start Webcam Stream
+if uploaded_file is not None and reference_embedding is not None:
+    webrtc_streamer(key="face_comparison", video_transformer_factory=FaceComparison)
 
 else:
     st.warning("Please upload a reference image to start comparison.")
