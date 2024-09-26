@@ -4,4 +4,4 @@ scipy==1.7.0
 openvino==2022.1.0
 streamlit==1.19.0
 streamlit-webrtc==0.41.0
-
+distutils
