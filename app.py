@@ -4,7 +4,7 @@ import numpy as np
 from openvino.runtime import Core
 from scipy.spatial.distance import cosine
 from streamlit_webrtc import VideoTransformerBase, webrtc_streamer
-from streamlit_camera_input_live import camera_input_live  # Assuming this is the correct import
+from camera_input_live import camera_input_live  # Assuming this is the correct import
 
 # Initialize OpenVINO's Inference Engine
 ie = Core()
