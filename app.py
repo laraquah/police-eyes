@@ -95,9 +95,10 @@ if self.reference_embedding is not None:
     face_infer_request.infer(inputs={face_input_layer_name: face_input})
     detections = face_infer_request.get_output_tensor().data
 
-    for detection in detections[0][0]:
+for detection in detections[0][0]:
         confidence = detection[2]
-            if confidence > 0.5:
+        
+if confidence > 0.5:
                 xmin = int(detection[3] * w)
                 ymin = int(detection[4] * h)
                 xmax = int(detection[5] * w)
