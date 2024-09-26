@@ -24,7 +24,7 @@ def postprocess_detections(detections, confidence_threshold):
             valid_detections.append(detection)
     return valid_detections
 
-def predict_image(image, exec_net, input_layer_name, conf_threshold):
+def predict_image(image, exec_net, input_layer_name):
     """Run inference on the image and visualize results."""
     input_image = preprocess_image(image)
     
