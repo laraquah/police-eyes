@@ -4,6 +4,7 @@ import numpy as np
 from openvino.runtime import Core
 from scipy.spatial.distance import cosine
 from streamlit_webrtc import VideoTransformerBase, webrtc_streamer
+from camera_input_live import camera_input_live
 
 # Initialize OpenVINO's Inference Engine
 ie = Core()
@@ -118,7 +119,7 @@ class FaceComparison(VideoTransformerBase):
 
 # Start Webcam Stream
 if uploaded_file is not None and reference_embedding is not None:
-    webrtc_streamer(key="face_comparison", video_transformer_factory=FaceComparison)
+    image = camera_input_live(key="face_comparison", video_transformer_factory=FaceComparison)
 
 else:
     st.warning("Please upload a reference image to start comparison.")
