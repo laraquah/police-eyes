@@ -1,7 +1,9 @@
 opencv-python-headless==4.5.3.56
 numpy==1.21.0
-scipy==1.7.0
 openvino==2022.1.0
 streamlit==1.19.0
 streamlit-webrtc==0.41.0
 distutils
+scipy>=1.10.0
+streamlit-camera-input-live==0.2.0
+streamlit
