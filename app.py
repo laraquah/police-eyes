@@ -82,44 +82,44 @@ class FaceComparison(VideoTransformerBase):
     def __init__(self):
         self.reference_embedding = reference_embedding  # Embedding from uploaded image
 
-    def transform(self, frame):
+    def transform(frame):
         frame = frame.to_ndarray(format="bgr24")
 
-        if self.reference_embedding is not None:
-            h, w = frame.shape[:2]
-            face_input = cv2.resize(frame, (672, 384))
-            face_input = face_input.transpose((2, 0, 1))
-            face_input = np.expand_dims(face_input, axis=0)
+if self.reference_embedding is not None:
+    h, w = frame.shape[:2]
+    face_input = cv2.resize(frame, (672, 384))
+    face_input = face_input.transpose((2, 0, 1))
+    face_input = np.expand_dims(face_input, axis=0)
 
-            # Perform face detection
-            face_infer_request.infer(inputs={face_input_layer_name: face_input})
-            detections = face_infer_request.get_output_tensor().data
+    # Perform face detection
+    face_infer_request.infer(inputs={face_input_layer_name: face_input})
+    detections = face_infer_request.get_output_tensor().data
 
-            for detection in detections[0][0]:
-                confidence = detection[2]
-                if confidence > 0.5:
-                    xmin = int(detection[3] * w)
-                    ymin = int(detection[4] * h)
-                    xmax = int(detection[5] * w)
-                    ymax = int(detection[6] * h)
+    for detection in detections[0][0]:
+        confidence = detection[2]
+            if confidence > 0.5:
+                xmin = int(detection[3] * w)
+                ymin = int(detection[4] * h)
+                xmax = int(detection[5] * w)
+                ymax = int(detection[6] * h)
 
-                    # Draw rectangle around face
-                    cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (0, 255, 0), 2)
+                # Draw rectangle around face
+                cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (0, 255, 0), 2)
 
-                    # Extract face for embedding generation
-                    face_crop = frame[ymin:ymax, xmin:xmax]
-                    current_embedding = get_face_embedding(face_crop, embedding_exec_net, embedding_input_layer_name)
+                # Extract face for embedding generation
+                face_crop = frame[ymin:ymax, xmin:xmax]
+                current_embedding = get_face_embedding(face_crop, embedding_exec_net, embedding_input_layer_name)
 
-                    # Compare the embeddings
-                    similarity = cosine_similarity(self.reference_embedding, current_embedding)
-                    if similarity > 0.5:  # Adjust threshold as needed
-                        cv2.putText(frame, "Criminal Identified!", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+                # Compare the embeddings
+                similarity = cosine_similarity(self.reference_embedding, current_embedding)
+                if similarity > 0.5:  # Adjust threshold as needed
+                    cv2.putText(frame, "Criminal Identified!", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
 
         return frame
 
 # Start Webcam Stream
 if uploaded_file is not None and reference_embedding is not None:
-    image = camera_input_live(key="face_comparison", video_transformer_factory=FaceComparison)
+    frame = camera_input_live(key="face_comparison", video_transformer_factory=FaceComparison)
 
 else:
     st.warning("Please upload a reference image to start comparison.")
