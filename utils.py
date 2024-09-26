@@ -1,3 +1,12 @@
+import streamlit as st
+import cv2
+import numpy as np
+from openvino.runtime import Core
+from scipy.spatial.distance import cosine
+from streamlit_webrtc import VideoTransformerBase, webrtc_streamer
+from camera_input_live import camera_input_live  # Assuming this is the correct import
+import PIL
+
 # Initialize OpenVINO's Inference Engine
 ie = Core()
 
