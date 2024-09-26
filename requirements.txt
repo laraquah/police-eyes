@@ -1,8 +1,8 @@
-opencv-python-headless==4.5.3.56
-numpy==1.21.0
-openvino==2024.0.0
-streamlit
-streamlit-webrtc>=0.47.0
-scipy>=1.10.0
-streamlit-camera-input-live==0.2.0
-setuptools>=65.0.0
+streamlit==1.21.0
+opencv-python==4.6.0.66
+opencv-python-headless==4.6.0.66
+numpy==1.23.5
+Pillow==9.4.0
+openvino-dev==2022.3.0
+streamlit-webrtc==0.34.0
+scipy==1.10.1
