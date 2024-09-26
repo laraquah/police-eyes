@@ -2,6 +2,24 @@ import cv2
 import numpy as np
 from openvino.runtime import Core
 
+# Initialize OpenVINO's Inference Engine
+ie = Core()
+
+# Load the face detection and face re-identification models
+face_model_path = "models2/face-detection-adas-0001.xml"
+embedding_model_path = "models2/face-reidentification-retail-0095.xml"
+
+# Load models into OpenVINO
+face_net = ie.read_model(model=face_model_path)
+face_exec_net = ie.compile_model(model=face_net, device_name="CPU")
+embedding_net = ie.read_model(model=embedding_model_path)
+embedding_exec_net = ie.compile_model(model=embedding_net, device_name="CPU")
+
+# Input layers for the models
+face_input_layer_name = face_net.inputs[0].get_any_name()
+embedding_input_layer_name = embedding_net.inputs[0].get_any_name()
+
+
 def load_model(model_path):
     """Load and compile the OpenVINO model."""
     ie = Core()
