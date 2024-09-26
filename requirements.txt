@@ -1,4 +1,4 @@
-opencv-python-headless==4.5.3.20210927
+opencv-python-headless
 numpy==1.21.0
 openvino==2024.0.0 
 streamlit
