@@ -6,6 +6,7 @@ from scipy.spatial.distance import cosine
 from streamlit_webrtc import VideoTransformerBase, webrtc_streamer
 from camera_input_live import camera_input_live  # Assuming this is the correct import
 import PIL
+import utils
 
 def play_live_camera():
     image = camera_input_live()
