@@ -69,13 +69,13 @@ if uploaded_file is not None:
     # Extract the face and get the embedding
     for detection in detections[0][0]:
         confidence = detection[2]
-        if confidence > 0.5:
-            xmin = int(detection[3] * w)
-            ymin = int(detection[4] * h)
-            xmax = int(detection[5] * w)
-            ymax = int(detection[6] * h)
-            face_crop = reference_image[ymin:ymax, xmin:xmax]
-            reference_embedding = get_face_embedding(face_crop, embedding_exec_net, embedding_input_layer_name)
+            if confidence > 0.5:
+                xmin = int(detection[3] * w)
+                ymin = int(detection[4] * h)
+                xmax = int(detection[5] * w)
+                ymax = int(detection[6] * h)
+                face_crop = reference_image[ymin:ymax, xmin:xmax]
+                reference_embedding = get_face_embedding(face_crop, embedding_exec_net, embedding_input_layer_name)
 
 # Define a custom transformer class to process the video stream
 class FaceComparison(VideoTransformerBase):
