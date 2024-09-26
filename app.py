@@ -5,6 +5,7 @@ from openvino.runtime import Core
 from scipy.spatial.distance import cosine
 from streamlit_webrtc import VideoTransformerBase, webrtc_streamer
 from camera_input_live import camera_input_live  # Assuming this is the correct import
+import PIL
 
 # Initialize OpenVINO's Inference Engine
 ie = Core()
@@ -78,59 +79,24 @@ if uploaded_file is not None:
             face_crop = reference_image[ymin:ymax, xmin:xmax]
             reference_embedding = get_face_embedding(face_crop, embedding_exec_net, embedding_input_layer_name)
 
-# Define a custom transformer class to process the video stream
-class FaceComparison(VideoTransformerBase):
-    def __init__(self):
-        self.reference_embedding = reference_embedding  # Embedding from uploaded image
-
-    def transform(self, frame):
-        frame = frame.to_ndarray(format="bgr24")
-
-        if self.reference_embedding is not None:
-            h, w = frame.shape[:2]
-            face_input = cv2.resize(frame, (672, 384))
-            face_input = face_input.transpose((2, 0, 1))
-            face_input = np.expand_dims(face_input, axis=0)
-
-            # Perform face detection
-            face_infer_request.infer(inputs={face_input_layer_name: face_input})
-            detections = face_infer_request.get_output_tensor().data
-
-            for detection in detections[0][0]:
-                confidence = detection[2]
-                if confidence > 0.5:
-                    xmin = int(detection[3] * w)
-                    ymin = int(detection[4] * h)
-                    xmax = int(detection[5] * w)
-                    ymax = int(detection[6] * h)
-
-                    # Draw rectangle around face
-                    cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (0, 255, 0), 2)
-
-                    # Extract face for embedding generation
-                    face_crop = frame[ymin:ymax, xmin:xmax]
-                    current_embedding = get_face_embedding(face_crop, embedding_exec_net, embedding_input_layer_name)
-
-                    # Compare the embeddings
-                    similarity = cosine_similarity(self.reference_embedding, current_embedding)
-                    if similarity > 0.5:  # Adjust threshold as needed
-                        cv2.putText(frame, "Criminal Identified!", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-
-        return frame
-
-# Start Webcam Stream with camera_input_live
+# Function to play live camera
 def play_live_camera():
     image = camera_input_live()
     uploaded_image = PIL.Image.open(image)
     uploaded_image_cv = cv2.cvtColor(np.array(uploaded_image), cv2.COLOR_RGB2BGR)
-    visualized_image = utils.predict_image(uploaded_image_cv, conf_threshold)
-    st.image(visualized_image, channels = "BGR")
+
+    # Here you might want to perform some processing on the uploaded_image_cv
+    # For example, running inference on the live image
+    # If no processing is needed, you can display it directly
+
+    st.image(uploaded_image_cv, channels="BGR")  # Display live camera feed
+
+# Start Webcam Stream with camera_input_live
+st.subheader("Live Camera Input")
+play_live_camera()  # Call the function to display live camera feed
 
 if uploaded_file is not None and reference_embedding is not None:
     webrtc_streamer(key="face_comparison", video_transformer_factory=FaceComparison)
 else:
     st.warning("Please upload a reference image to start comparison.")
 
-# Display live camera frame
-if live_frame is not None:
-    st.image(live_frame, caption="Live Camera Feed", use_column_width=True)
