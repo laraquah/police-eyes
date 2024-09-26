@@ -1,6 +1,5 @@
 streamlit
 opencv-python==4.6.0.66
-Pillow==9.4.0
 openvino
 numpy==1.26.4
 opencv-python-headless==4.10.0.84
