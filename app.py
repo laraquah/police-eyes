@@ -4,6 +4,7 @@ import numpy as np
 from openvino.runtime import Core
 from scipy.spatial.distance import cosine
 from streamlit_webrtc import VideoTransformerBase, webrtc_streamer
+from streamlit_camera_input_live import camera_input_live  # Assuming this is the correct import
 
 # Initialize OpenVINO's Inference Engine
 ie = Core()
@@ -47,6 +48,8 @@ st.text("Using OpenVINO and Streamlit")
 
 # Upload the reference image
 uploaded_file = st.file_uploader("Upload a picture of the person to compare", type=["jpg", "jpeg", "png"])
+reference_embedding = None  # Initialize reference embedding
+
 if uploaded_file is not None:
     # Load the reference image
     reference_image = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
@@ -54,7 +57,6 @@ if uploaded_file is not None:
     st.image(reference_image, caption="Uploaded Reference Image", use_column_width=True)
 
     # Perform face detection and embedding extraction on the reference image
-    reference_embedding = None
     h, w = reference_image.shape[:2]
     face_input = cv2.resize(reference_image, (672, 384))  # Resize to model input size
     face_input = face_input.transpose((2, 0, 1))  # Convert HWC to CHW
@@ -116,9 +118,15 @@ class FaceComparison(VideoTransformerBase):
 
         return frame
 
-# Start Webcam Stream
+# Start Webcam Stream with camera_input_live
+st.subheader("Live Camera Input")
+live_frame = camera_input_live()  # Call the function to get the live frame
+
 if uploaded_file is not None and reference_embedding is not None:
     webrtc_streamer(key="face_comparison", video_transformer_factory=FaceComparison)
-
 else:
     st.warning("Please upload a reference image to start comparison.")
+
+# Display live camera frame
+if live_frame is not None:
+    st.image(live_frame, caption="Live Camera Feed", use_column_width=True)
