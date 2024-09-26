@@ -1,8 +1,8 @@
-opencv-python-headless
+opencv-python-headless==4.5.3.56
 numpy==1.21.0
-openvino==2024.0.0 
-streamlit
+openvino==2024.0.0
+streamlit==1.20.0          # Specify a version that works with your code
 streamlit-webrtc>=0.47.0
 scipy>=1.10.0
-streamlit-camera-input-live==0.2.0
+streamlit-camera-input-live==0.2.0  # Include this if you are using this package
 setuptools>=65.0.0
