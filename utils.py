@@ -1,85 +1,43 @@
-import streamlit as st
 import cv2
 import numpy as np
 from openvino.runtime import Core
-from scipy.spatial.distance import cosine
-from streamlit_webrtc import VideoTransformerBase, webrtc_streamer
-from camera_input_live import camera_input_live  # Assuming this is the correct import
-import PIL
 
-# Initialize OpenVINO's Inference Engine
-ie = Core()
+def load_model(model_path):
+    """Load and compile the OpenVINO model."""
+    ie = Core()
+    model = ie.read_model(model=model_path)
+    exec_model = ie.compile_model(model=model, device_name="CPU")
+    return exec_model
 
-# Load the face detection and face re-identification models
-face_model_path = "models2/face-detection-adas-0001.xml"
-embedding_model_path = "models2/face-reidentification-retail-0095.xml"
+def preprocess_image(image, size=(672, 384)):
+    """Preprocess the input image for model inference."""
+    image_resized = cv2.resize(image, size)
+    image_transposed = image_resized.transpose((2, 0, 1))  # Convert HWC to CHW
+    return np.expand_dims(image_transposed, axis=0)  # Add batch dimension
 
-# Load models into OpenVINO
-face_net = ie.read_model(model=face_model_path)
-face_exec_net = ie.compile_model(model=face_net, device_name="CPU")
-embedding_net = ie.read_model(model=embedding_model_path)
-embedding_exec_net = ie.compile_model(model=embedding_net, device_name="CPU")
+def postprocess_detections(detections, confidence_threshold):
+    """Filter detections based on confidence threshold."""
+    valid_detections = []
+    for detection in detections[0][0]:  # Adjust based on your output structure
+        confidence = detection[2]
+        if confidence > confidence_threshold:
+            valid_detections.append(detection)
+    return valid_detections
 
-# Input layers for the models
-face_input_layer_name = face_net.inputs[0].get_any_name()
-embedding_input_layer_name = embedding_net.inputs[0].get_any_name()
-
-# Function to calculate cosine similarity
-def cosine_similarity(embedding1, embedding2):
-    return 1 - cosine(embedding1, embedding2)
-
-# Function to extract embeddings from the face image
-def get_face_embedding(image, exec_net, input_layer_name):
-    # Resize to input size required by the model
-    input_image = cv2.resize(image, (128, 128))  # Adjust size as per model requirements
-    input_image = input_image.transpose((2, 0, 1))  # Convert HWC to CHW
-    input_image = np.expand_dims(input_image, axis=0)
-
-    # Perform inference to get face embeddings
+def predict_image(image, exec_net, input_layer_name, conf_threshold):
+    """Run inference on the image and visualize results."""
+    input_image = preprocess_image(image)
+    
+    # Perform inference
     infer_request = exec_net.create_infer_request()
     infer_request.infer(inputs={input_layer_name: input_image})
-    
-    # Get output embeddings
-    embedding = infer_request.get_output_tensor().data
-    return embedding.flatten()
+    detections = infer_request.get_output_tensor().data
 
-# Streamlit page configuration
-st.title("Police Eyes :cop:")
-st.text("Using OpenVINO and Streamlit")
+    # Process detections and visualize
+    for detection in postprocess_detections(detections, conf_threshold):
+        class_id, confidence, xmin, ymin, xmax, ymax = detection
+        cv2.rectangle(image, (xmin, ymin), (xmax, ymax), (0, 255, 0), 2)  # Draw green box
+        cv2.putText(image, f'Class: {class_id}, Conf: {confidence:.2f}', 
+                    (xmin, ymin - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
 
-# Radio button to choose source
-source_radio = st.radio("Choose your input source:", ("UPLOAD", "WEBCAM"))
-
-# Upload the reference image if source is UPLOAD
-reference_embedding = None  # Initialize reference embedding
-
-if source_radio == "UPLOAD":
-    uploaded_file = st.file_uploader("Upload a picture of the person to compare", type=["jpg", "jpeg", "png"])
-    
-    if uploaded_file is not None:
-        # Load the reference image
-        reference_image = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
-        reference_image = cv2.imdecode(reference_image, 1)
-        st.image(reference_image, caption="Uploaded Reference Image", use_column_width=True)
-
-        # Perform face detection and embedding extraction on the reference image
-        h, w = reference_image.shape[:2]
-        face_input = cv2.resize(reference_image, (672, 384))  # Resize to model input size
-        face_input = face_input.transpose((2, 0, 1))  # Convert HWC to CHW
-        face_input = np.expand_dims(face_input, axis=0)
-
-        # Detect face in reference image
-        face_infer_request = face_exec_net.create_infer_request()
-        face_infer_request.infer(inputs={face_input_layer_name: face_input})
-        detections = face_infer_request.get_output_tensor().data
-
-        # Extract the face and get the embedding
-        for detection in detections[0][0]:
-            confidence = detection[2]
-            if confidence > 0.5:
-                xmin = int(detection[3] * w)
-                ymin = int(detection[4] * h)
-                xmax = int(detection[5] * w)
-                ymax = int(detection[6] * h)
-                face_crop = reference_image[ymin:ymax, xmin:xmax]
-                reference_embedding = get_face_embedding(face_crop, embedding_exec_net, embedding_input_layer_name)
+    return image
