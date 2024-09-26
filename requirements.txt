@@ -1,6 +1,6 @@
 opencv-python-headless==4.5.3.56
 numpy==1.21.0
-openvino==2024.0.0
+openvino==2024.0.0 
 streamlit
 streamlit-webrtc>=0.47.0
 scipy>=1.10.0
