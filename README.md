@@ -54,4 +54,4 @@ Run it locally or deploy it using Streamlit Cloud, and simulate real-time face r
 
 Thanks for visiting **Police Eyes**!  :))
 
-![Thank You for Visiting](https://media.giphy.com/media/vTlZw1SH0CNnW/giphy.gif)
+![Thank You for Visiting!]([https://media.giphy.com/media/vTlZw1SH0CNnW/giphy.gif](https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExb2k4cWR4eTJrMmZmNHhlZTR0MG94aHBtdmFhZmZzd2trMnp2NHdsNiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/WnIu6vAWt5ul3EVcUE/giphy.gif))
