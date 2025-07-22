@@ -119,7 +119,9 @@ if confidence > 0.5:
         return frame
 
 # Start Webcam Stream
-if uploaded_file is not None and reference_embedding is not None:
-    frame = camera_input_live(key="face_comparison", video_transformer_factory=FaceComparison)
+if uploaded_file is None:
+    st.warning("Please upload a reference picture to start comparison.")
+elif reference_embedding is None:
+    st.warning("Face not detected in the reference image. Please upload a clearer photo.")
 else:
-    st.warning("Please upload a reference image to start comparison.")
+    frame = camera_input_live(key="face_comparison", video_transformer_factory=FaceComparison)
