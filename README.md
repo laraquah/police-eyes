@@ -50,7 +50,7 @@ Run it locally or deploy it using Streamlit Cloud, and simulate real-time face r
 
 ---
 
-### Thank You!
+### Thank You! ⭐
 
 Thanks for visiting **Police Eyes**!  :))
 
