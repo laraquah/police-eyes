@@ -2,7 +2,7 @@
 
 **Police Eyes** is a facial recognition web app built with Streamlit and powered by OpenVINO. The goal? Detect potential matches between a known reference photo and a live webcam capture — and raise the alarm when needed.
 
-### 🔍 Purpose
+### Purpose
 
 This app is designed to identify individuals by comparing a captured photo against an uploaded reference image. If the system finds a strong match, it displays:
 
@@ -12,7 +12,7 @@ This simulation showcases how real-time face recognition technology could be app
 
 ---
 
-### 🚦 How It Works
+### How It Works
 
 1. **Upload a Reference Image**  
    Upload a photo of the individual you want to compare against (e.g., a suspect’s image).
@@ -28,7 +28,7 @@ This simulation showcases how real-time face recognition technology could be app
 
 ---
 
-### 🧠 Tech Stack
+### Tech Stack
 
 - **Streamlit**: Frontend interface
 - **OpenVINO**: Real-time inference engine
@@ -36,7 +36,7 @@ This simulation showcases how real-time face recognition technology could be app
 
 ---
 
-### ⚠️ Notes
+### Notes !!
 
 - Ensure the reference photo has a clearly visible face.
 - The webcam feed will only work if a reference photo is successfully uploaded.
@@ -44,13 +44,13 @@ This simulation showcases how real-time face recognition technology could be app
 
 ---
 
-### 🧪 Want to Try It?
+### Want to Try It?
 
 Run it locally or deploy it using Streamlit Cloud, and simulate real-time face recognition instantly!
 
 ---
 
-### 🙏 Thank You
+### Thank You!
 
 Thanks for visiting **Police Eyes**!  :))
 
