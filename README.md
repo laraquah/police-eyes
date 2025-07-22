@@ -52,7 +52,6 @@ Run it locally or deploy it using Streamlit Cloud, and simulate real-time face r
 
 ### 🙏 Thank You
 
-Thanks for visiting **Police Eyes**!  
-We hope you enjoyed exploring facial recognition in action.
+Thanks for visiting **Police Eyes**!  :))
 
 ![Thank You for Visiting](https://media.giphy.com/media/vTlZw1SH0CNnW/giphy.gif)
